@@ -49,8 +49,8 @@ namespace ParticleUniverse
 		mBillboardType(DEFAULT_BILLBOARD_TYPE)
 	{
 		// hack 2.0
-		//mBillboardSet = PU_NEW Ogre::BillboardSet("", 0, true);
-		mBillboardSet = ParticleSystemManager::getSingletonPtr()->getSceneManager()->createBillboardSet();
+		mBillboardSet = PU_NEW Ogre::BillboardSet(Ogre::Id::generateNewId<Ogre::MovableObject>(), &ParticleSystemManager::getSingletonPtr()->getSceneManager()->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), 0, true);
+		//mBillboardSet = ParticleSystemManager::getSingletonPtr()->getSceneManager()->createBillboardSet();
 		mBillboardSet->setBillboardsInWorldSpace(true);
 		autoRotate = false;
 	}
@@ -59,9 +59,8 @@ namespace ParticleUniverse
 	{
 		if (mBillboardSet)
 		{
-			// hack 2.0
-			//PU_DELETE mBillboardSet;
-			//mBillboardSet = 0;
+			PU_DELETE mBillboardSet;
+			mBillboardSet = 0;
 		}
 	}
 	//-----------------------------------------------------------------------
@@ -208,7 +207,7 @@ namespace ParticleUniverse
 		mBillboardSet->setCullIndividually(mCullIndividual);
 		mBillboardSet->clear();
 
-		//mBillboardSet->beginBillboards(pool->getSize(Particle::PT_VISUAL));
+		mBillboardSet->beginBillboards(pool->getSize(Particle::PT_VISUAL));
 		Billboard bb; // This is the Particle Universe Billboard and not the Ogre Billboard
 		
 		VisualParticle* particle = static_cast<VisualParticle*>(pool->getFirst(Particle::PT_VISUAL));
@@ -244,18 +243,18 @@ namespace ParticleUniverse
 				// PU 1.4: No validation on max. texture coordinate because of performance reasons.
 				bb.setTexcoordIndex(particle->textureCoordsCurrent);
 					
-				//mBillboardSet->injectBillboard(bb, cam);
-				Ogre::Billboard* obb = mBillboardSet->createBillboard(particle->position);
-				if (particle->ownDimensions)
-				{
-					obb->setDimensions(particle->width, particle->height);
-				}
+				mBillboardSet->injectBillboard(bb, cam);
+				//Ogre::Billboard* obb = mBillboardSet->createBillboard(particle->position);
+				//if (particle->ownDimensions)
+				//{
+				//	obb->setDimensions(particle->width, particle->height);
+				//}
 			}
 			
 			particle = static_cast<VisualParticle*>(pool->getNext(Particle::PT_VISUAL));
 		}
 
-        //mBillboardSet->endBillboards();
+        mBillboardSet->endBillboards();
 
 		// Update the queue
 		mBillboardSet->_updateRenderQueue(queue, cam, cam);
