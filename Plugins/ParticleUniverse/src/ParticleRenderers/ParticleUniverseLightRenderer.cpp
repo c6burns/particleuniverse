@@ -96,10 +96,13 @@ namespace ParticleUniverse
 		Ogre::SceneManager* sceneManager = mParentTechnique->getParentSystem()->getSceneManager();
 		for (size_t i = 0; i < mQuota; i++)
 		{
+			// hack 2.0
+			/*
 			if (sceneManager->hasLight(mLightName + StringConverter::toString(i)))
 			{
 				sceneManager->destroyLight(mLightName + StringConverter::toString(i));
 			}
+			*/
 		}
 		mLights.clear();
 
@@ -265,8 +268,10 @@ namespace ParticleUniverse
 			for (size_t i = 0; i < mQuota; i++)
 			{
 				sceneNodeName = "ParticleUniverse" + ss.str() + StringConverter::toString(i);
+				Ogre::SceneNode* sn = parentNode->createChildSceneNode();
+				sn->setName(sceneNodeName);
 				LightRendererVisualData* visualData = 
-					PU_NEW_T(LightRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(parentNode->createChildSceneNode(sceneNodeName));
+					PU_NEW_T(LightRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(sn);
 
 				mAllVisualData.push_back(visualData); // Managed by this renderer
 				mVisualData.push_back(visualData); // Used to assign to a particle
@@ -279,7 +284,8 @@ namespace ParticleUniverse
 			Ogre::Light* light;
 			for (it = mAllVisualData.begin(), j = 0; it != itEnd; ++it, ++j)
 			{
-				light = technique->getParentSystem()->getSceneManager()->createLight(mLightName + StringConverter::toString(j));
+				light = technique->getParentSystem()->getSceneManager()->createLight();
+				light->setName(mLightName + StringConverter::toString(j));
 				(*it)->node->attachObject(light);
 				light->setType(mLightType);
 				light->setAttenuation(mAttenuationRange, mAttenuationConstant, mAttenuationLinear, mAttenuationQuadratic);

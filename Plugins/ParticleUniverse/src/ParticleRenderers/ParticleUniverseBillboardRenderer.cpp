@@ -30,6 +30,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ParticleRenderers/ParticleUniverseBillboardRenderer.h"
 #include "ParticleRenderers/ParticleUniverseBillboard.h"
 
+#include "OgreSceneManager.h"
+
 namespace ParticleUniverse
 {
 	// Constants
@@ -46,7 +48,9 @@ namespace ParticleUniverse
 		ParticleRenderer(),
 		mBillboardType(DEFAULT_BILLBOARD_TYPE)
 	{
-		mBillboardSet = PU_NEW Ogre::BillboardSet("", 0, true);
+		// hack 2.0
+		//mBillboardSet = PU_NEW Ogre::BillboardSet("", 0, true);
+		mBillboardSet = ParticleSystemManager::getSingletonPtr()->getSceneManager()->createBillboardSet();
 		mBillboardSet->setBillboardsInWorldSpace(true);
 		autoRotate = false;
 	}
@@ -55,8 +59,9 @@ namespace ParticleUniverse
 	{
 		if (mBillboardSet)
 		{
-			PU_DELETE mBillboardSet;
-			mBillboardSet = 0;
+			// hack 2.0
+			//PU_DELETE mBillboardSet;
+			//mBillboardSet = 0;
 		}
 	}
 	//-----------------------------------------------------------------------
@@ -188,6 +193,8 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	void BillboardRenderer::_updateRenderQueue(Ogre::RenderQueue* queue, ParticlePool* pool)
 	{
+		// hack 2.0
+		Ogre::Camera* cam = ParticleSystemManager::getSingletonPtr()->getCamera();
 		// Always perform this one
 		ParticleRenderer::_updateRenderQueue(queue, pool);
 
@@ -199,8 +206,9 @@ namespace ParticleUniverse
 			return;
 
 		mBillboardSet->setCullIndividually(mCullIndividual);
+		mBillboardSet->clear();
 
-		mBillboardSet->beginBillboards(pool->getSize(Particle::PT_VISUAL));
+		//mBillboardSet->beginBillboards(pool->getSize(Particle::PT_VISUAL));
 		Billboard bb; // This is the Particle Universe Billboard and not the Ogre Billboard
 		
 		VisualParticle* particle = static_cast<VisualParticle*>(pool->getFirst(Particle::PT_VISUAL));
@@ -236,21 +244,26 @@ namespace ParticleUniverse
 				// PU 1.4: No validation on max. texture coordinate because of performance reasons.
 				bb.setTexcoordIndex(particle->textureCoordsCurrent);
 					
-				mBillboardSet->injectBillboard(bb);
+				//mBillboardSet->injectBillboard(bb, cam);
+				Ogre::Billboard* obb = mBillboardSet->createBillboard(particle->position);
+				if (particle->ownDimensions)
+				{
+					obb->setDimensions(particle->width, particle->height);
+				}
 			}
 			
 			particle = static_cast<VisualParticle*>(pool->getNext(Particle::PT_VISUAL));
 		}
 
-        mBillboardSet->endBillboards();
+        //mBillboardSet->endBillboards();
 
 		// Update the queue
-		mBillboardSet->_updateRenderQueue(queue);
+		mBillboardSet->_updateRenderQueue(queue, cam, cam);
 	}
 	//-----------------------------------------------------------------------
 	void BillboardRenderer::_notifyAttached(Ogre::Node* parent, bool isTagPoint)
 	{
-		mBillboardSet->_notifyAttached(parent, isTagPoint);
+		mBillboardSet->_notifyAttached(parent);
 	}
 	//-----------------------------------------------------------------------
 	void BillboardRenderer::_setMaterialName(const String& materialName)
@@ -298,7 +311,8 @@ namespace ParticleUniverse
 	void BillboardRenderer::setVisible(bool visible)
 	{
 		ParticleRenderer::setVisible(visible);
-		mBillboardSet->setVisible(visible);
+		// hack 2.0 ... we can't set this as visible before it is attached
+		//mBillboardSet->setVisible(visible);
 	}
 	//-----------------------------------------------------------------------
 	void BillboardRenderer::copyAttributesTo (ParticleRenderer* renderer)

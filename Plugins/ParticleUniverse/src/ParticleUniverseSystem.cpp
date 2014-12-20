@@ -62,10 +62,10 @@ namespace ParticleUniverse
 			void setValue(Real value) {mTarget->_update(value);}
 	};
 	//-----------------------------------------------------------------------
-	ParticleSystem::ParticleSystem(const String& name) :
+	ParticleSystem::ParticleSystem(const String& name, Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager) :
 		IElement(),
 		mAABB(),
-		MovableObject(name),
+		MovableObject(id, objectMemoryManager, Ogre::RENDER_QUEUE_MAIN),
 		mSceneManager(0),
 		mTimeController(0),
 		mUseController(true),
@@ -111,12 +111,13 @@ namespace ParticleUniverse
 	{
 		mBoundingRadius = 1;
 		particleType = PT_SYSTEM;
+		mName = name;
 	}
 	//-----------------------------------------------------------------------
-	ParticleSystem::ParticleSystem(const String& name, const String& resourceGroupName) :
+	ParticleSystem::ParticleSystem(const String& name, const String& resourceGroupName, Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager) :
 		IElement(),
 		mAABB(),
-		MovableObject(name),
+		MovableObject(id, objectMemoryManager, Ogre::RENDER_QUEUE_MAIN),
 		mSceneManager(0),
 		mTimeController(0),
 		mUseController(true),
@@ -161,6 +162,7 @@ namespace ParticleUniverse
 		mLastLodIndex(0)
 	{
 		mBoundingRadius = 1;
+		mName = name;
 	}
 	//-----------------------------------------------------------------------
 	ParticleSystem::~ParticleSystem(void)
@@ -448,7 +450,7 @@ namespace ParticleUniverse
 		{
 			if (mParentNode)
 			{
-				mDerivedPosition = mParentNode->_getDerivedPosition();
+				mDerivedPosition = mParentNode->_getDerivedPositionUpdated();
 			}
 			else
 			{
@@ -649,7 +651,7 @@ namespace ParticleUniverse
 	{
 		if (mSceneManager)
 		{
-			return mSceneManager->getCamera(mMainCameraName);
+			return mSceneManager->findCamera(mMainCameraName);
 		}
 		return 0;
 	}
@@ -665,7 +667,7 @@ namespace ParticleUniverse
 		mMainCameraNameSet = true;
 		if (mSceneManager)
 		{
-			mCurrentCamera = mSceneManager->getCamera(cameraName);
+			mCurrentCamera = mSceneManager->findCamera(cameraName);
 		}
 	}
 	//-----------------------------------------------------------------------
@@ -697,12 +699,12 @@ namespace ParticleUniverse
 		mFastForwardSet = false;
 	}
 	//-----------------------------------------------------------------------
-	void ParticleSystem::_notifyAttached(Ogre::Node* parent, bool isTagPoint)
+	void ParticleSystem::_notifyAttached(Ogre::Node* parent)
 	{
 		// Generate the event
 		_pushSystemEvent(PU_EVT_SYSTEM_ATTACHING);
 
-		MovableObject::_notifyAttached(parent, isTagPoint);
+		MovableObject::_notifyAttached(parent);
 		
 		if (parent)
 		{
@@ -731,7 +733,7 @@ namespace ParticleUniverse
 		ParticleTechniqueIterator itEnd = mTechniques.end();
 		for (it = mTechniques.begin(); it != itEnd; ++it)
 		{
-			(*it)->_notifyAttached(parent, isTagPoint);
+			(*it)->_notifyAttached(parent);
 		}
 
 		// Generate the event
@@ -741,7 +743,8 @@ namespace ParticleUniverse
 	void ParticleSystem::_notifyCurrentCamera(Camera* cam)
 	{
 		mCurrentCamera = cam;
-		Ogre::MovableObject::_notifyCurrentCamera(cam);
+		// hack2.0
+		//Ogre::MovableObject::_notifyCurrentCamera(cam);
 		mLastVisibleFrame = Ogre::Root::getSingleton().getNextFrameNumber();
 		mTimeSinceLastVisible = 0.0f;
 
@@ -827,7 +830,7 @@ namespace ParticleUniverse
 		return mBoundingRadius;
 	}
 	//-----------------------------------------------------------------------
-	void ParticleSystem::_updateRenderQueue(Ogre::RenderQueue* queue)
+	void ParticleSystem::_updateRenderQueue(Ogre::RenderQueue* queue, Camera *camera, const Camera *lodCamera)
 	{
 		// Update renderqueues of all techniques
 		ParticleTechniqueIterator it;
@@ -1005,10 +1008,14 @@ namespace ParticleUniverse
 			Note, the patch in the link was to put the code in each technique. It seems more obvious to put it in the particle system itself, so it
 			is updated only once.
 		*/
+
+		// hack 2.0
+		/*
 		if (isInScene() && getParentNode())
 		{
 			getParentNode()->_update(true, true);
 		}
+		*/
 
 		ParticleTechniqueIterator it;
 		ParticleTechniqueIterator itEnd = mTechniques.end();
@@ -1106,7 +1113,8 @@ namespace ParticleUniverse
 		mBoundingRadius = 0.0;
 		if (mParentNode)
 		{
-			mParentNode->needUpdate();
+			// hack 2.0
+			//mParentNode->needUpdate();
 		}
 	}
 	//-----------------------------------------------------------------------

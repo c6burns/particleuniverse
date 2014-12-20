@@ -2496,6 +2496,7 @@ namespace ParticleUniverse
 
 		Real timePoint = 0.0f;
 		Real timeInc = timeElapsed / requested;
+		Quaternion do1;
 		for (unsigned int j = 0; j < requested; ++j)
 		{
 			// Create a new particle & init using emitter
@@ -2514,8 +2515,9 @@ namespace ParticleUniverse
 			/** Apply initial orientation to the direction. This cannot be done with the position. 
 			    Applying orientation to the position is already taken care of by the emitters.
 			*/
-			particle->direction = (getParentSystem()->getDerivedOrientation() * particle->direction);
-			particle->originalDirection = (getParentSystem()->getDerivedOrientation() * particle->originalDirection);
+			do1 = getParentSystem()->getDerivedOrientation();
+			particle->direction = (do1 * particle->direction);
+			particle->originalDirection = (do1 * particle->originalDirection);
 
 			// Apply particle initialization by the affectors (if the affector is enabled)
 			if (!mAffectors.empty())

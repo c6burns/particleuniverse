@@ -28,6 +28,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "ParticleUniverseAttachable.h"
+#include "OgreSceneManager.h"
 
 namespace ParticleUniverse
 {
@@ -36,7 +37,8 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	Attachable::Attachable(void) :
 		Extern(),
-		MovableObject(),
+		// hack 2.0
+		MovableObject(Ogre::Id::generateNewId<MovableObject>(), &ParticleSystemManager::getSingletonPtr()->getSceneManager()->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), Ogre::RENDER_QUEUE_MAIN),
 		mAABB(),
 		mDistanceThreshold(std::numeric_limits<float>::max()),
 		mDistanceThresholdSet(false)
@@ -50,12 +52,13 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	void Attachable::_notifyAttached(Ogre::Node* parent, bool isTagPoint)
 	{
-		MovableObject::_notifyAttached(parent, isTagPoint);
+		MovableObject::_notifyAttached(parent);
 	}
 	//-----------------------------------------------------------------------
 	void Attachable::_notifyCurrentCamera(Camera* cam)
 	{
-		Ogre::MovableObject::_notifyCurrentCamera(cam);
+		// hack 2.0
+		//Ogre::MovableObject::_notifyCurrentCamera(cam);
 	}
 	//-----------------------------------------------------------------------
 	const String& Attachable::getMovableType(void) const
@@ -84,7 +87,7 @@ namespace ParticleUniverse
 		mDistanceThreshold = distanceThreshold;
 	}
 	//-----------------------------------------------------------------------
-	void Attachable::_updateRenderQueue(Ogre::RenderQueue* queue)
+	void Attachable::_updateRenderQueue(Ogre::RenderQueue* queue, Camera *camera, const Camera *lodCamera)
 	{
 		// Nothing to do here.
 	}

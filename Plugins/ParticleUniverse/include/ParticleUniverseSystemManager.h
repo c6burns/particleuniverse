@@ -207,6 +207,10 @@ namespace ParticleUniverse
 			// The ScriptTranslatorManager needed to parse the scripts.
 			BuiltinScriptTranslatorManager* mBuiltinScriptTranslatorManager;
 
+			// hack2.0
+			Ogre::SceneManager* mSceneManager;
+			Ogre::Camera* mCamera;
+
 		public:
 			// Constructor
 			ParticleSystemManager (void);
@@ -674,6 +678,13 @@ namespace ParticleUniverse
 				This function gives more control over loading the materials.
 	        */
 			void setAutoLoadMaterials(bool autoLoadMaterials);
+
+
+			// hack2.0
+			inline void setSceneManager(Ogre::SceneManager* sm) { mSceneManager = sm; }
+			inline Ogre::SceneManager* getSceneManager() { return mSceneManager; }
+			inline void setCamera(Ogre::Camera* cam) { mCamera = cam; }
+			inline Ogre::Camera* getCamera() { return mCamera; }
 	};
 
 	//-----------------------------------------------------------------------
@@ -683,7 +694,7 @@ namespace ParticleUniverse
 	class _ParticleUniverseExport ParticleSystemFactory : public Ogre::MovableObjectFactory
 	{
 		protected:
-			Ogre::MovableObject* createInstanceImpl(const String& name, const Ogre::NameValuePairList* params);
+			Ogre::MovableObject* createInstanceImpl(Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager, const Ogre::NameValuePairList* params = 0);
 		
 		public:
 			ParticleSystemFactory(void) {};

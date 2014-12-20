@@ -131,12 +131,13 @@ namespace ParticleUniverse
         mSphereSet->endSpheres();
 
 		// Update the queue
-		mSphereSet->_updateRenderQueue(queue);
+		Ogre::Camera* cam = ParticleSystemManager::getSingletonPtr()->getCamera();
+		mSphereSet->_updateRenderQueue(queue, cam, cam);
 	}
 	//-----------------------------------------------------------------------
 	void SphereRenderer::_notifyAttached(Ogre::Node* parent, bool isTagPoint)
 	{
-		mSphereSet->_notifyAttached(parent, isTagPoint);
+		mSphereSet->_notifyAttached(parent);
 	}
 	//-----------------------------------------------------------------------
 	void SphereRenderer::_setMaterialName(const String& materialName)

@@ -68,11 +68,14 @@ namespace ParticleUniverse
 		mParticleSystemFactory = PU_NEW ParticleSystemFactory();
 		Ogre::Root::getSingleton().addMovableObjectFactory(mParticleSystemFactory);
 
+		// hack2.0
+		/*
 		mBoxSetFactory = PU_NEW BoxSetFactory();
 		Ogre::Root::getSingleton().addMovableObjectFactory(mBoxSetFactory);
 
 		mSphereSetFactory = PU_NEW SphereSetFactory();
 		Ogre::Root::getSingleton().addMovableObjectFactory(mSphereSetFactory);
+		*/
 	}
 	//-----------------------------------------------------------------------
 	ParticleSystemManager::~ParticleSystemManager (void)
@@ -125,14 +128,14 @@ namespace ParticleUniverse
 		// Only destroy the SceneNodes that start with "ParticleUniverse"
 		if (sceneNode)
 		{
-			Ogre::SceneNode::ChildNodeIterator iterator = sceneNode->getChildIterator();
+			Ogre::Node::NodeVecIterator iterator = sceneNode->getChildIterator();
 			while(iterator.hasMoreElements())
 			{
 				Ogre::SceneNode* childSceneNode = static_cast<Ogre::SceneNode*>(iterator.getNext());
 				String name = childSceneNode->getName();
 				if(name.compare(0, 16, "ParticleUniverse") == 0)
 				{
-					sceneNode->removeAndDestroyChild(name);
+					sceneNode->removeAndDestroyChild(childSceneNode);
 				}
 			}
 		}
@@ -153,12 +156,16 @@ namespace ParticleUniverse
 		Ogre::SceneManager* sceneManager,
 		const uint poolSize)
 	{
+		// hack2.0
+		return NULL;
+		/*
 		Ogre::NameValuePairList params;
 		params["poolSize"] = StringConverter::toString(poolSize);
 	
 		return static_cast<BoxSet*>(
 			sceneManager->createMovableObject(name, BoxSetFactory::PU_FACTORY_TYPE_NAME,
 			&params));
+		*/
 	}
 	//-----------------------------------------------------------------------
 	void ParticleSystemManager::destroyBoxSet(BoxSet* boxSet, Ogre::SceneManager* sceneManager)
@@ -170,12 +177,16 @@ namespace ParticleUniverse
 		Ogre::SceneManager* sceneManager,
 		const uint poolSize)
 	{
+		// hack2.0
+		return NULL;
+		/*
 		Ogre::NameValuePairList params;
 		params["poolSize"] = StringConverter::toString(poolSize);
 	
 		return static_cast<SphereSet*>(
 			sceneManager->createMovableObject(name, SphereSetFactory::PU_FACTORY_TYPE_NAME,
 			&params));
+		*/
 	}
 	//-----------------------------------------------------------------------
 	void ParticleSystemManager::destroySphereSet(SphereSet* sphereSet, Ogre::SceneManager* sceneManager)
@@ -796,7 +807,7 @@ namespace ParticleUniverse
 #endif
 		}
 
-		ParticleSystem* particleSystemTemplate = PU_NEW ParticleSystem(expName, resourceGroupName);
+		ParticleSystem* particleSystemTemplate = PU_NEW ParticleSystem(expName, resourceGroupName, Ogre::Id::generateNewId<Ogre::MovableObject>(), &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC));
 		addParticleSystemTemplate(expName, particleSystemTemplate);
 		mLastCreatedParticleSystemTemplateName = expName;
 
@@ -879,8 +890,9 @@ namespace ParticleUniverse
 		params["templateName"] = templateName;
 	
 		ParticleSystem* system = static_cast<ParticleSystem*>(
-			sceneManager->createMovableObject(name, ParticleSystemFactory::PU_FACTORY_TYPE_NAME,
+			sceneManager->createMovableObject(ParticleSystemFactory::PU_FACTORY_TYPE_NAME, &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC),
 			&params));
+		system->setName(name);
 		system->setSceneManager(sceneManager);
 		system->setTemplateName(templateName);
 		mParticleSystems[name] = system;
@@ -900,8 +912,9 @@ namespace ParticleUniverse
 
 		Ogre::NameValuePairList params;
 		ParticleSystem* system = static_cast<ParticleSystem*>(
-		sceneManager->createMovableObject(name, ParticleSystemFactory::PU_FACTORY_TYPE_NAME, 
+			sceneManager->createMovableObject(ParticleSystemFactory::PU_FACTORY_TYPE_NAME, &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC),
 			&params));
+		system->setName(name);
 		system->setSceneManager(sceneManager);
 		mParticleSystems[name] = system;
 		return system;
@@ -933,10 +946,11 @@ namespace ParticleUniverse
 		}
 
 		// First determine whether the Particle System still exists, before it is really destroyed.
-		if (sceneManager->hasMovableObject(particleSystem->getName(), ParticleSystemFactory::PU_FACTORY_TYPE_NAME))
-		{
+		// hack2.0
+		//if (sceneManager->hasMovableObject(particleSystem->getName(), ParticleSystemFactory::PU_FACTORY_TYPE_NAME))
+		//{
 			sceneManager->destroyMovableObject(particleSystem);
-		}
+		//}
 	}
 	//-----------------------------------------------------------------------
 	void ParticleSystemManager::destroyParticleSystem(const String& particleSystemName, Ogre::SceneManager* sceneManager)
@@ -949,10 +963,13 @@ namespace ParticleUniverse
 		}
 
 		// First determine whether the Particle System still exists, before it is really destroyed.
+		// hack2.0
+		/*
 		if (sceneManager->hasMovableObject(particleSystemName, ParticleSystemFactory::PU_FACTORY_TYPE_NAME))
 		{
 			sceneManager->destroyMovableObject(particleSystemName, ParticleSystemFactory::PU_FACTORY_TYPE_NAME);
 		}
+		*/
 	}
 	//-----------------------------------------------------------------------
 	void ParticleSystemManager::destroyAllParticleSystems(Ogre::SceneManager* sceneManager)
@@ -964,7 +981,8 @@ namespace ParticleUniverse
 		while ( t != mParticleSystems.end() )
 		{
 			ParticleSystem* particleSystem = t->second;
-			if (sceneManager->hasMovableObject(particleSystem->getName(), ParticleSystemFactory::PU_FACTORY_TYPE_NAME))
+			// hack 2.0
+			if (particleSystem->getParentNode())
 			{
 				sceneManager->destroyMovableObject(particleSystem);
 				mParticleSystems.erase( t++ ); // PU 1.4
@@ -978,7 +996,7 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	ParticleSystem* ParticleSystemManager::_createSystemImpl(const String& name)
 	{
-		ParticleSystem* sys = PU_NEW ParticleSystem(name);
+		ParticleSystem* sys = PU_NEW ParticleSystem(name, Ogre::Id::generateNewId<Ogre::MovableObject>(), &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC));
 		return sys;
 	}
 	//-----------------------------------------------------------------------
@@ -991,7 +1009,7 @@ namespace ParticleUniverse
 			EXCEPT(Exception::ERR_INVALIDPARAMS, "PU: Cannot find required template '" + templateName + "'", "ParticleSystemManager::createSystem");
 		}
 
-		ParticleSystem* sys = PU_NEW ParticleSystem(name);
+		ParticleSystem* sys = PU_NEW ParticleSystem(name, Ogre::Id::generateNewId<Ogre::MovableObject>(), &mSceneManager->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC));
         
 		// Copy template settings
 		*sys = *pTemplate;
@@ -1139,6 +1157,9 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	void ParticleSystemManager::createDepthMap (Camera* camera, Ogre::SceneManager* sceneManager)
 	{
+		// hack 2.0
+		// no more depth map xD
+		/*
 		// Don´t recreate the depth map
 		if (mDepthMap || mDepthMapExtern)
 		{
@@ -1225,6 +1246,7 @@ namespace ParticleUniverse
 			mDepthMapTargetListener.mCamera = camera;
 			mDepthMapTargetListener.mDepthMap = mDepthMap;
 		}
+		*/
 
 		// Set debug overlay for testing purposes (uncomment if you want to view the depth map in the debug overlay)
 //		if (!mDebugOverlay)
@@ -1363,6 +1385,9 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	void DepthMapTargetListener::preViewportUpdate(const Ogre::RenderTargetViewportEvent& evt)
 	{
+		// hack 2.0
+		// no more depth map xD
+		/*
 		// Exclude the particle system renderers that renders soft particles, by setting visibility to false
 		vector<ParticleRenderer*>::iterator it;
 		vector<ParticleRenderer*>::iterator itEnd = mRenderers.end();
@@ -1377,10 +1402,14 @@ namespace ParticleUniverse
 		// Add the DepthMapTargetListener as a RenderableListener to replace the technique for all renderables
 		Ogre::RenderQueue* queue = mSceneManager->getRenderQueue();
 		queue->setRenderableListener(this);
+		*/
 	}
 	//-----------------------------------------------------------------------
 	void DepthMapTargetListener::postViewportUpdate(const Ogre::RenderTargetViewportEvent& evt)
 	{
+		// hack 2.0
+		// no more depth map xD
+		/*
 		// Include the particle system renderers again
 		vector<ParticleRenderer*>::iterator it;
 		vector<ParticleRenderer*>::iterator itEnd = mRenderers.end();
@@ -1395,6 +1424,7 @@ namespace ParticleUniverse
 
 		// Reset the overlays
 		mCamera->getViewport()->setOverlaysEnabled(true);
+		*/
 	}
 	//-----------------------------------------------------------------------
 	bool DepthMapTargetListener::renderableQueued(Ogre::Renderable* rend, uint8 groupID, ushort priority, Ogre::Technique** ppTech, Ogre::RenderQueue* pQueue)
@@ -1431,9 +1461,12 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	String ParticleSystemFactory::PU_FACTORY_TYPE_NAME = "PUParticleSystem";
 	//-----------------------------------------------------------------------
-	Ogre::MovableObject* ParticleSystemFactory::createInstanceImpl( const String& name, 
+	Ogre::MovableObject* ParticleSystemFactory::createInstanceImpl(Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager,
 		const Ogre::NameValuePairList* params)
 	{
+		// hack 2.0
+		// no more names when created via factory
+		String name("PU_AUTO_NAMED");
 		if (params != 0)
 		{
 			Ogre::NameValuePairList::const_iterator ni = params->find("templateName");

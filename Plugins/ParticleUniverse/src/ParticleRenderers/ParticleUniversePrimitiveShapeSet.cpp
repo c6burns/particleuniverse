@@ -37,6 +37,7 @@ namespace ParticleUniverse
 {
 	//-----------------------------------------------------------------------
 	PrimitiveShapeSet::PrimitiveShapeSet(void) :
+		MovableObject(Ogre::Id::generateNewId<MovableObject>(), &ParticleSystemManager::getSingletonPtr()->getSceneManager()->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), Ogre::RENDER_QUEUE_MAIN),
 		mBoundingRadius(0.0f), 
 		mWorldSpace(false),
 		mCullIndividual(false),
@@ -44,11 +45,11 @@ namespace ParticleUniverse
 		mAllDefaultSize(true)
 	{
 		setMaterialName("BaseWhite");
-		mCastShadows = false;
+		//mCastShadows = false;
 	}
 	//-----------------------------------------------------------------------
 	PrimitiveShapeSet::PrimitiveShapeSet(const String& name, unsigned int poolSize, bool externalData) :
-		MovableObject(name),
+		MovableObject(Ogre::Id::generateNewId<MovableObject>(), &ParticleSystemManager::getSingletonPtr()->getSceneManager()->_getEntityMemoryManager(Ogre::SCENE_DYNAMIC), Ogre::RENDER_QUEUE_MAIN),
 		mBoundingRadius(0.0f), 
 		mWorldSpace(false),
 		mCullIndividual(false),
@@ -56,7 +57,8 @@ namespace ParticleUniverse
 		mAllDefaultSize(true)
 	{
 		setMaterialName("BaseWhite");
-		mCastShadows = false;
+		//mCastShadows = false;
+		mName = name;
 	}
 	//-----------------------------------------------------------------------
 	PrimitiveShapeSet::~PrimitiveShapeSet(void)
@@ -88,7 +90,8 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	void PrimitiveShapeSet::_notifyCurrentCamera(Camera* cam)
     {
-		Ogre::MovableObject::_notifyCurrentCamera(cam);
+		// hack 2.0
+		//Ogre::MovableObject::_notifyCurrentCamera(cam);
 		mCurrentCamera = cam;
     }
 	//-----------------------------------------------------------------------
@@ -189,7 +192,9 @@ namespace ParticleUniverse
 	//-----------------------------------------------------------------------
 	uint32 PrimitiveShapeSet::getTypeFlags(void) const
 	{
-		return Ogre::SceneManager::FX_TYPE_MASK;
+		// hack 2.0
+		//return Ogre::SceneManager::FX_TYPE_MASK;
+		return 0;
 	}
 	//-----------------------------------------------------------------------
 	Real PrimitiveShapeSet::getSquaredViewDepth(const Camera* const cam) const

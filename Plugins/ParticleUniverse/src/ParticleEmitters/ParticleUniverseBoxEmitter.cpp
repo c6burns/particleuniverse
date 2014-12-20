@@ -86,12 +86,18 @@ namespace ParticleUniverse
 		ParticleSystem* sys = mParentTechnique->getParentSystem();
 		if (sys)
 		{
+			Vector3 dp1 = getDerivedPosition();
+			Quaternion do1 = sys->getDerivedOrientation();
+			Vector3 range1 = Vector3(Math::SymmetricRandom() * mXRange, Math::SymmetricRandom() * mYRange, Math::SymmetricRandom() * mZRange);
+			particle->position = dp1 + do1 * (_mEmitterScale * range1);
+			/*
 			particle->position = getDerivedPosition() + 
 				sys->getDerivedOrientation() *
 				(_mEmitterScale *
 				Vector3(Math::SymmetricRandom() * mXRange,
 					Math::SymmetricRandom() * mYRange,
 					Math::SymmetricRandom() * mZRange));
+			*/
 		}
 		else
 		{

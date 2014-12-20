@@ -120,13 +120,13 @@ namespace ParticleUniverse
 				unsigned short numChilds = parentNode->numChildren();
 				for (unsigned short i = 0; i < numChilds; ++i)
 				{
-					Ogre::Node* node = parentNode->getChild(i);
+					Ogre::SceneNode* node = static_cast<Ogre::SceneNode*>(parentNode->getChild(i));
 					if (node)
 					{
 						Ogre::String name = node->getName();
 						if (name.find("ParticleUniverse") != Ogre::String::npos)
 						{
-							parentNode->removeAndDestroyChild(i);
+							parentNode->removeAndDestroyChild(node);
 						}
 					}
 				}
@@ -138,10 +138,13 @@ namespace ParticleUniverse
 		Ogre::SceneManager* sceneManager = mParentTechnique->getParentSystem()->getSceneManager();
 		for (size_t i = 0; i < mQuota; i++)
 		{
+			// hack 2.0
+			/*
 			if (sceneManager->hasEntity(mEntityName + StringConverter::toString(i)))
 			{
 				sceneManager->destroyEntity(mEntityName + StringConverter::toString(i));
 			}
+			*/
 		}
 		mEntities.clear();
 
@@ -201,8 +204,10 @@ namespace ParticleUniverse
 			for (size_t i = 0; i < mQuota; i++)
 			{
 				sceneNodeName = "ParticleUniverse" + ss.str() + StringConverter::toString(i);
+				Ogre::SceneNode* sn = parentNode->createChildSceneNode();
+				sn->setName(sceneNodeName);
 				EntityRendererVisualData* visualData = 
-					PU_NEW_T(EntityRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(parentNode->createChildSceneNode(sceneNodeName));
+					PU_NEW_T(EntityRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(sn);
 
 				mAllVisualData.push_back(visualData); // Managed by this renderer
 				mVisualData.push_back(visualData); // Used to assign to a particle
@@ -215,13 +220,14 @@ namespace ParticleUniverse
 			size_t j;
 			for (it = mAllVisualData.begin(), j = 0; it != itEnd; ++it, ++j)
 			{
-				Ogre::Entity* clonedEntity = entity->clone(mEntityName + StringConverter::toString(j));
+				Ogre::Entity* clonedEntity = entity->clone();
+				clonedEntity->setName(mEntityName + StringConverter::toString(j));
 				clonedEntity->setMaterialName(technique->getMaterialName());
 				clonedEntity->setRenderQueueGroup(mQueueId);
 				mEntities.push_back(clonedEntity);
 				(*it)->node->attachObject(clonedEntity);
 			}
-			technique->getParentSystem()->getSceneManager()->destroyEntity(mEntityName);
+			technique->getParentSystem()->getSceneManager()->destroyEntity(entity);
 		}
 
 		_makeNodesVisible(false);

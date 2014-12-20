@@ -313,12 +313,13 @@ namespace ParticleUniverse
 			mBoundingRadius = Math::Sqrt(maxSqLen);
         }
 
-        if (mParentNode)
-            mParentNode->needUpdate();
+		// hack 2.0
+        //if (mParentNode)
+        //    mParentNode->needUpdate();
 
     }
 	//-----------------------------------------------------------------------
-	void SphereSet::_updateRenderQueue(Ogre::RenderQueue* queue)
+	void SphereSet::_updateRenderQueue(Ogre::RenderQueue* queue, Camera *camera, const Camera *lodCamera)
     {
 		if (!mExternalData)
 		{
@@ -332,7 +333,7 @@ namespace ParticleUniverse
 			endSpheres();
 		}
 
-		if( mRenderQueueIDSet )
+		if( mRenderQueueID )
 		{
 			queue->addRenderable(this, mRenderQueueID);
 		}

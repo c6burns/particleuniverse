@@ -249,8 +249,9 @@ namespace ParticleUniverse
 		else
 		{
 			// Add the techniques' derived position. Use the emiters' own 'position' as offset.
-			mDerivedPosition = mParentTechnique->getDerivedPosition() + mParentTechnique->getParentSystem()->getDerivedOrientation() * 
-				(_mEmitterScale * position);
+			Vector3 dp1 = mParentTechnique->getDerivedPosition();
+			Quaternion do1 = mParentTechnique->getParentSystem()->getDerivedOrientation();
+			mDerivedPosition = dp1 + do1 * (_mEmitterScale * position);
 		}
 		return mDerivedPosition;
 	}

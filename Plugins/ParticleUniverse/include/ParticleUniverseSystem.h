@@ -31,6 +31,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ParticleUniverseSystemListener.h"
 #include "OgreMovableObject.h"
 #include "ParticleUniverseController.h"
+#include "OgreStringConverter.h"
 
 namespace ParticleUniverse
 {
@@ -77,8 +78,8 @@ namespace ParticleUniverse
 			typedef vector<ParticleSystemListener*>::iterator ParticleSystemListenerIterator;
 			typedef vector<ParticleSystemListener*> ParticleSystemListenerList;
 
-			ParticleSystem(const String& name);
-			ParticleSystem(const String& name, const String& resourceGroupName);
+			ParticleSystem(const String& name, Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager);
+			ParticleSystem(const String& name, const String& resourceGroupName, Ogre::IdType id, Ogre::ObjectMemoryManager *objectMemoryManager);
 	        virtual ~ParticleSystem(void);
 
 			/** Gets the derived position of the particle system (i.e derived from the parent node, if available).
@@ -174,7 +175,7 @@ namespace ParticleUniverse
 			@see
 				MovableObject
 			*/
-			void _notifyAttached(Ogre::Node* parent, bool isTagPoint = false);
+			void _notifyAttached(Ogre::Node* parent);
 
 			/** Overridden from MovableObject
 			@see
@@ -204,7 +205,7 @@ namespace ParticleUniverse
 			@see
 				MovableObject
 			*/
-			inline virtual void _updateRenderQueue(Ogre::RenderQueue* queue);
+			inline virtual void _updateRenderQueue(Ogre::RenderQueue* queue, Camera *camera, const Camera *lodCamera);
 
 			/** Overridden from MovableObject
 			@see
@@ -339,7 +340,7 @@ namespace ParticleUniverse
 
 			/** Determines whether the parent is a TagPoint or a SceneNode.
 			*/
-			inline bool isParentIsTagPoint(void) {return mParentIsTagPoint;};
+			inline bool isParentIsTagPoint(void) {return false;};
 
 			/** Returns the distances at which level-of-detail (LOD) levels come into effect.
 			*/

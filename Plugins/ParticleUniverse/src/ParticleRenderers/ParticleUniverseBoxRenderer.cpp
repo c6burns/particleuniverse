@@ -131,12 +131,14 @@ namespace ParticleUniverse
         mBoxSet->endBoxes();
 
 		// Update the queue
-		mBoxSet->_updateRenderQueue(queue);
+		// hack 2.0
+		Ogre::Camera* cam = ParticleSystemManager::getSingletonPtr()->getCamera();
+		mBoxSet->_updateRenderQueue(queue, cam, cam);
 	}
 	//-----------------------------------------------------------------------
 	void BoxRenderer::_notifyAttached(Ogre::Node* parent, bool isTagPoint)
 	{
-		mBoxSet->_notifyAttached(parent, isTagPoint);
+		mBoxSet->_notifyAttached(parent);
 	}
 	//-----------------------------------------------------------------------
 	void BoxRenderer::_setMaterialName(const String& materialName)

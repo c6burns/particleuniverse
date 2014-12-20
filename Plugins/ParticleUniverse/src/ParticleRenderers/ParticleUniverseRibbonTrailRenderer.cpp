@@ -174,9 +174,11 @@ namespace ParticleUniverse
 
 		// Delete the Ribbontrail
 		Ogre::SceneManager* sceneManager = mParentTechnique->getParentSystem()->getSceneManager();
-		if (mTrail && sceneManager && sceneManager->hasRibbonTrail(mRibbonTrailName))
+		// hack 2.0
+		//if (mTrail && sceneManager && sceneManager->hasRibbonTrail(mRibbonTrailName))
+		if (mTrail && sceneManager)
 		{
-			sceneManager->destroyRibbonTrail(mRibbonTrailName);
+			sceneManager->destroyRibbonTrail(mTrail);
 			mTrail = 0;
 		}
 
@@ -229,7 +231,8 @@ namespace ParticleUniverse
 			std::stringstream ss; 
 			ss << this;
 			String childNodeNodeName = "ParticleUniverse" + ss.str();
-			mChildNode = mParentTechnique->getParentSystem()->getParentSceneNode()->createChildSceneNode(childNodeNodeName);
+			mChildNode = mParentTechnique->getParentSystem()->getParentSceneNode()->createChildSceneNode();
+			mChildNode->setName(childNodeNodeName);
 			mChildNode->setInheritOrientation(false);
 		}
 
@@ -237,7 +240,8 @@ namespace ParticleUniverse
 		{
 			// Create RibbonTrail
 			Ogre::SceneManager* sceneManager = mParentTechnique->getParentSystem()->getSceneManager();
-			mTrail = sceneManager->createRibbonTrail(mRibbonTrailName);
+			mTrail = sceneManager->createRibbonTrail();
+			mTrail->setName(mRibbonTrailName);
 			mTrail->setNumberOfChains(mQuota);
 			mTrail->setMaxChainElements(mMaxChainElements);
 			mTrail->setMaterialName(technique->getMaterialName());
@@ -259,8 +263,10 @@ namespace ParticleUniverse
 			for (size_t i = 0; i < mQuota; i++)
 			{
 				sceneNodeName = "ParticleUniverse" + ss.str() + StringConverter::toString(i);
+				Ogre::SceneNode* sn = mChildNode->createChildSceneNode();
+				sn->setName(sceneNodeName);
 				RibbonTrailRendererVisualData* visualData = 
-					PU_NEW_T(RibbonTrailRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(mChildNode->createChildSceneNode(sceneNodeName), mTrail);
+					PU_NEW_T(RibbonTrailRendererVisualData, MEMCATEGORY_SCENE_OBJECTS)(sn, mTrail);
 				visualData->node->setInheritOrientation(false);
 				visualData->index = i;
 				mAllVisualData.push_back(visualData); // Managed by this renderer
@@ -354,7 +360,8 @@ namespace ParticleUniverse
 	{
 		if (mTrail)
 		{
-			mTrail->_notifyCurrentCamera(cam);
+			// hack 2.0
+			//mTrail->_notifyCurrentCamera(cam);
 		}
 	}
 	//-----------------------------------------------------------------------

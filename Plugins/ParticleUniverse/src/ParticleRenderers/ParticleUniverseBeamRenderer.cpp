@@ -186,7 +186,8 @@ namespace ParticleUniverse
 			std::stringstream ss; 
 			ss << this;
 			mBillboardChainName = "Beam" + ss.str();
-			mBillboardChain = sceneManager->createBillboardChain(mBillboardChainName);
+			mBillboardChain = sceneManager->createBillboardChain();
+			mBillboardChain->setName(mBillboardChainName);
 			mBillboardChain->setDynamic(true);
 			mBillboardChain->setNumberOfChains(mQuota);
 			mBillboardChain->setMaxChainElements(mMaxChainElements);
@@ -352,9 +353,11 @@ namespace ParticleUniverse
 
 		// Delete the BillboardChain
 		Ogre::SceneManager* sceneManager = mParentTechnique->getParentSystem()->getSceneManager();
-		if (mBillboardChain && sceneManager && sceneManager->hasBillboardChain(mBillboardChainName))
+		// hack 2.0
+		//if (mBillboardChain && sceneManager && sceneManager->hasBillboardChain(mBillboardChainName))
+		if (mBillboardChain && sceneManager)
 		{
-			sceneManager->destroyBillboardChain(mBillboardChainName);
+			sceneManager->destroyBillboardChain(mBillboardChain);
 			mBillboardChain = 0;
 		}
 
@@ -385,7 +388,8 @@ namespace ParticleUniverse
 	{
 		if (mBillboardChain)
 		{
-			mBillboardChain->_notifyCurrentCamera(cam);
+			// hack 2.0
+			//mBillboardChain->_notifyCurrentCamera(cam);
 		}
 	}
 	//-----------------------------------------------------------------------

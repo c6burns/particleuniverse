@@ -264,7 +264,7 @@ namespace ParticleUniverse
 			@see
 				MovableObject
 			*/
-			virtual void _updateRenderQueue(Ogre::RenderQueue* queue);
+			virtual void _updateRenderQueue(Ogre::RenderQueue* queue, Camera *camera, const Camera *lodCamera);
 
 			/** Overridden from MovableObject
 			@see
