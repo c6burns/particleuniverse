@@ -205,7 +205,7 @@ namespace ParticleUniverse
 			return;
 
 		mBillboardSet->setCullIndividually(mCullIndividual);
-		mBillboardSet->clear();
+		//mBillboardSet->clear();
 
 		mBillboardSet->beginBillboards(pool->getSize(Particle::PT_VISUAL));
 		Billboard bb; // This is the Particle Universe Billboard and not the Ogre Billboard
@@ -244,11 +244,13 @@ namespace ParticleUniverse
 				bb.setTexcoordIndex(particle->textureCoordsCurrent);
 					
 				mBillboardSet->injectBillboard(bb, cam);
-				//Ogre::Billboard* obb = mBillboardSet->createBillboard(particle->position);
-				//if (particle->ownDimensions)
-				//{
-				//	obb->setDimensions(particle->width, particle->height);
-				//}
+				/*
+				Ogre::Billboard* obb = mBillboardSet->createBillboard(particle->position);
+				if (particle->ownDimensions)
+				{
+					obb->setDimensions(particle->width, particle->height);
+				}
+				*/
 			}
 			
 			particle = static_cast<VisualParticle*>(pool->getNext(Particle::PT_VISUAL));
