@@ -26,6 +26,6 @@ add_definitions(-DOGRE_PLUGIN_DIR_REL="${OGRE_PLUGIN_DIR_REL}")
 add_definitions(-DOGRE_PLUGIN_DIR_DBG="${OGRE_PLUGIN_DIR_DBG}")
 
 add_subdirectory(Plugins/ParticleUniverse)
-add_subdirectory(Samples/ParticleUniverseDemo)
-add_subdirectory(Tools/AtlasImageTool)
+#add_subdirectory(Samples/ParticleUniverseDemo)
+#add_subdirectory(Tools/AtlasImageTool)
 
